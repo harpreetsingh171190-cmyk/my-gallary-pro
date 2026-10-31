@@ -1,0 +1,9 @@
+Face grouping needs a face-embedding model named face_embedder.tflite in this folder.
+
+Expected model: an image model that takes a 112 x 112 x 3 float input (pixels scaled to [-1, 1])
+and outputs one vector per face (for example a MobileFaceNet-style model, shape [1, D]).
+
+Check the license of any model before you use or distribute it. Many face-recognition models have
+non-commercial or research-only terms.
+
+Until the file is here, the People tab shows a notice and scanning stays off. Nothing else is affected.
