@@ -1,0 +1,63 @@
+name: Build APK
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Build debug APK
+        run: gradle :app:assembleDebug --no-daemon --stacktrace
+      - name: Build summary
+        if: success()
+        run: |
+          echo "### Build OK" >> "$GITHUB_STEP_SUMMARY"
+          ls -lh app/build/outputs/apk/debug/*.apk | awk '{print "- " $9 " (" $5 ")"}' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MyGallery-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+      - name: Upload build reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-reports
+          path: |
+            app/build/reports/
+            app/build/outputs/logs/
+          if-no-files-found: ignore
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/debug/*.apk
+          generate_release_notes: true
+      - name: Run unit tests (report only)
+        id: unit_tests
+        continue-on-error: true
+        timeout-minutes: 10
+        run: gradle :app:testDebugUnitTest --no-daemon --continue
+      - name: Test result summary
+        if: always()
+        run: echo "### Unit tests - ${{ steps.unit_tests.outcome }}" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-reports
+          path: app/build/reports/tests/
+          if-no-files-found: ignore
+          retention-days: 7
