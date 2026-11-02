@@ -30,7 +30,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-mlkit-document-scanner:16.0.0")
     implementation("com.google.mlkit:text-recognition:16.0.1")
     implementation("com.google.mlkit:face-detection:16.1.7")
-    implementation("org.tensorflow:tensorflow-lite:2.14.0")
+    implementation("org.tensorflow:tensorflow-lite:2.17.0")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.13")
 }
